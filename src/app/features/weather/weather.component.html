@@ -1,0 +1,119 @@
+<div class="d-flex flex-column flex-fill">
+  <div class="container-fluid px-4 py-5 d-flex flex-column justify-content-center flex-fill">
+    <div class="row justify-content-center">
+      <div class="col-12">
+        <div class="text-center">
+          <!-- Back Button -->
+          <div class="text-start mb-4">
+            <button class="btn btn-outline-light" (click)="goBack()">
+              <i class="bi bi-arrow-left me-2"></i>Back to Home
+            </button>
+          </div>
+
+          <h1 class="display-4 fw-bold mb-4 text-white">Weather Information</h1>
+
+          <!-- City Input -->
+          <div class="row justify-content-center mb-4">
+            <div class="col-lg-8 col-md-10">
+              <div class="input-group">
+                <input 
+                  type="text" 
+                  class="form-control form-control-lg" 
+                  placeholder="Enter city name..."
+                  [(ngModel)]="city"
+                  (keyup.enter)="getWeatherData()"
+                >
+                <button 
+                  class="btn btn-primary btn-lg px-3" 
+                  type="button"
+                  (click)="getWeatherData()"
+                  [disabled]="loading"
+                  title="Search Weather"
+                >
+                  <i class="bi bi-search"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Error Display -->
+          <div *ngIf="error" class="alert alert-danger" role="alert">
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            {{ error }}
+          </div>
+
+          <!-- Weather Data Display -->
+          <div *ngIf="weatherData && !loading" class="weather-card">
+            <div class="card bg-black bg-opacity-15 backdrop-blur border-0 shadow-lg">
+              <div class="card-body p-5">
+                <h2 class="card-title mb-4 text-white">{{ weatherData.city }}</h2>
+                
+                <div class="row">
+                  <div class="col-md-6 text-center mb-4">
+                    <div class="temperature-display">
+                      <h3 class="display-1 text-white mb-2">{{ weatherData.temperature }}</h3>
+                      <p class="lead text-white-50">{{ weatherData.description }}</p>
+                      <p class="text-white-50">{{ weatherData.feelsLike }}</p>
+                    </div>
+                  </div>
+                  
+                  <div class="col-md-6">
+                    <div class="weather-details">
+                      <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="text-white-50">Humidity:</span>
+                        <span class="fw-bold text-white">{{ weatherData.humidity }}</span>
+                      </div>
+                      <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="text-white-50">Wind Speed:</span>
+                        <span class="fw-bold text-white">{{ weatherData.windSpeed }}</span>
+                      </div>
+                      <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="text-white-50">Pressure:</span>
+                        <span class="fw-bold text-white">{{ weatherData.pressure }}</span>
+                      </div>
+                      <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="text-white-50">Visibility:</span>
+                        <span class="fw-bold text-white">{{ weatherData.visibility }}</span>
+                      </div>
+                      <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="text-white-50">UV Index:</span>
+                        <span class="fw-bold text-white">{{ weatherData.uvIndex }}</span>
+                      </div>
+                      <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="text-white-50">Sunrise:</span>
+                        <span class="fw-bold text-white">{{ weatherData.sunrise }}</span>
+                      </div>
+                      <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="text-white-50">Sunset:</span>
+                        <span class="fw-bold text-white">{{ weatherData.sunset }}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Loading Spinner -->
+          <div *ngIf="loading" class="text-center">
+            <div class="spinner-border text-light" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="text-white mt-3">Fetching weather data...</p>
+          </div>
+
+          <!-- Initial State -->
+          <div *ngIf="!weatherData && !loading && !error" class="text-center">
+            <div class="card bg-black bg-opacity-15 backdrop-blur border-0 shadow-lg">
+              <div class="card-body p-5">
+                <i class="bi bi-cloud-sun display-1 text-white-50 mb-3"></i>
+                <h3 class="text-white">Enter a city to get weather information</h3>
+                <p class="text-white-50">Search for any city around the world to see current weather conditions.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> 
