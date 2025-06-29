@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { BrandComponent } from '../brand/brand.component';
 import { ProfileDropdownComponent, MenuItem } from '../profile-dropdown/profile-dropdown.component';
+import { AuthService } from '../../services/auth/auth.service';
 
 @Component({
   selector: 'app-header',
@@ -13,6 +14,9 @@ import { ProfileDropdownComponent, MenuItem } from '../profile-dropdown/profile-
 })
 export class HeaderComponent {
   private router = inject(Router);
+  private authService = inject(AuthService);
+
+  readonly isAuthenticated$ = this.authService.isAuthenticated$;
 
   onMenuItemClick(item: MenuItem): void {
     console.log('Menu item clicked:', item.action);

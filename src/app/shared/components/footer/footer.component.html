@@ -4,7 +4,10 @@
         <div class="d-flex flex-column flex-lg-row align-items-center justify-content-between text-center text-lg-start">
             <app-brand class="mb-3 mb-lg-0"></app-brand>
             <div class="d-flex align-items-center">
-                <app-check-weather-button></app-check-weather-button>
+                <!-- Show GitHub login button when not authenticated -->
+                <app-github-login-button *ngIf="(isAuthenticated$ | async) === false"></app-github-login-button>
+                <!-- Show check weather button when authenticated -->
+                <app-check-weather-button *ngIf="isAuthenticated$ | async" (checkWeather)="onCheckWeather()"></app-check-weather-button>
             </div>
         </div>
     </div>

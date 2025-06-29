@@ -2,7 +2,14 @@ import { Injectable, inject } from '@angular/core';
 import { AuthService as Auth0Service } from '@auth0/auth0-angular';
 import { Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { AuthUser } from './interfaces/auth.interface';
+import { AuthUser, AuthError } from './interfaces/auth.interface';
+
+// Interface for Auth0 error structure
+interface Auth0Error extends Error {
+  error?: string;
+  error_description?: string;
+  url?: string;
+}
 
 @Injectable({
   providedIn: 'root'
@@ -25,7 +32,13 @@ export class AuthService {
       picture: user.picture
     } : null)
   ) || of(null);
-  readonly error$ = this.auth0?.error$ || of(null);
+  readonly error$ = this.auth0?.error$.pipe(
+    map(error => error ? {
+      error: (error as Auth0Error).error || error.message || 'Unknown error',
+      errorDescription: (error as Auth0Error).error_description || error.message || 'An error occurred during authentication',
+      url: (error as Auth0Error).url || ''
+    } as AuthError : null)
+  ) || of(null);
 
   login(): void {
     console.log('AuthService.login() called');
