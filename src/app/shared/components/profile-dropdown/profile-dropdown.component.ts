@@ -1,6 +1,7 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, Output, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NgbDropdownModule } from '@ng-bootstrap/ng-bootstrap';
+import { AuthService } from '../../services/auth/auth.service';
 
 /**
  * Interface for dropdown menu items
@@ -33,6 +34,11 @@ export class ProfileDropdownComponent {
   /** Event emitter for menu item clicks */
   @Output() menuItemClick = new EventEmitter<MenuItem>();
 
+  public authService = inject(AuthService);
+
+  readonly isAuthenticated$ = this.authService.isAuthenticated$;
+  readonly user$ = this.authService.getAuthUser();
+
   /** Available menu items */
   menuItems: MenuItem[] = [
     {
@@ -54,6 +60,10 @@ export class ProfileDropdownComponent {
    * @param item - The clicked menu item
    */
   onItemClick(item: MenuItem): void {
-    this.menuItemClick.emit(item);
+    if (item.action === 'logout') {
+      this.authService.logout();
+    } else {
+      this.menuItemClick.emit(item);
+    }
   }
 } 

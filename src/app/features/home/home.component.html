@@ -3,12 +3,44 @@
     <div class="row justify-content-center">
       <div class="col-lg-8 col-md-10">
         <div class="text-center">
-          <h1 class="display-4 fw-bold mb-4 text-white">Hello World!</h1>
-          <div class="mt-4">
-            <button class="btn btn-dark btn-lg px-4 py-3 rounded-3 fw-semibold shadow" (click)="loginWithGitHub()">
-              <i class="bi bi-github me-2"></i> Login with GitHub
-            </button>
-          </div>
+          <!-- Error Display -->
+          <ng-container *ngIf="error$ | async as error; else mainContent">
+            <div class="alert alert-danger" role="alert">
+              <h4 class="alert-heading">Authentication Error</h4>
+              <p *ngIf="error.errorDescription">{{ error.errorDescription }}</p>
+              <p *ngIf="error.error">Error: {{ error.error }}</p>
+              <hr>
+              <p class="mb-0">
+                <button class="btn btn-outline-danger me-2" (click)="clearError()">Dismiss</button>
+                <button class="btn btn-primary" (click)="loginWithProvider('github')">Try Again</button>
+              </p>
+            </div>
+          </ng-container>
+
+          <!-- Main Content -->
+          <ng-template #mainContent>
+            <!-- Welcome message for authenticated users -->
+            <ng-container *ngIf="isAuthenticated$ | async; else loginSection">
+              <h1 class="display-4 fw-bold mb-4 text-white">Welcome!</h1>
+              <p class="lead text-white mb-4">Hello, {{ (user$ | async)?.name || 'User' }}!</p>
+              <div class="mt-4">
+                <button class="btn btn-light btn-lg px-4 py-3 rounded-3 fw-semibold shadow">
+                  <i class="bi bi-cloud-sun me-2"></i> Check Weather
+                </button>
+              </div>
+            </ng-container>
+
+            <!-- Login section for unauthenticated users -->
+            <ng-template #loginSection>
+              <h1 class="display-4 fw-bold mb-4 text-white">Hello World!</h1>
+              <p class="lead text-white mb-4">Welcome to WeatherApp. Please login to continue.</p>
+              <div class="mt-4 d-flex flex-column flex-sm-row gap-3 justify-content-center">
+                <button class="btn btn-dark btn-lg px-4 py-3 rounded-3 fw-semibold shadow" (click)="loginWithProvider('github')">
+                  <i class="bi bi-github me-2"></i> Login with GitHub
+                </button>
+              </div>
+            </ng-template>
+          </ng-template>
         </div>
       </div>
     </div>

@@ -33,6 +33,7 @@
     "@angular/platform-server": "^20.0.0",
     "@angular/router": "^20.0.0",
     "@angular/ssr": "^20.0.4",
+    "@auth0/auth0-angular": "^2.2.3",
     "@ng-bootstrap/ng-bootstrap": "^19.0.0",
     "bootstrap": "^5.3.7",
     "express": "^5.1.0",
