@@ -1,1 +1,12 @@
-/* Layout styles are now handled by Bootstrap utility classes */ 
+/* Layout styles are now handled by Bootstrap utility classes */
+
+/* Layout styles with consistent background for all pages */
+.d-flex.flex-column.min-vh-100 {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+}
+
+/* Ensure main content area takes full height */
+main.flex-fill {
+  background: inherit;
+} 
