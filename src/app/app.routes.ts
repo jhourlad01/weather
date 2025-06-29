@@ -4,6 +4,7 @@ import { HOME_ROUTES } from './features/home/home.routes';
 import { WEATHER_ROUTES } from './features/weather/weather.routes';
 import { authGuard } from './shared/guards/auth.guard';
 import { UnauthorizedComponent } from './features/unauthorized/unauthorized.component';
+import { NotFoundComponent } from './features/not-found/not-found.component';
 
 export const routes: Routes = [
   {
@@ -24,5 +25,9 @@ export const routes: Routes = [
   {
     path: 'unauthorized',
     component: UnauthorizedComponent
+  },
+  {
+    path: '**',
+    component: NotFoundComponent
   }
 ];
