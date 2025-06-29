@@ -21,12 +21,53 @@
           <ng-template #mainContent>
             <!-- Welcome message for authenticated users -->
             <ng-container *ngIf="isAuthenticated$ | async; else loginSection">
-              <h1 class="display-4 fw-bold mb-4 text-white">Welcome!</h1>
-              <p class="lead text-white mb-4">Hello, {{ (user$ | async)?.name || 'User' }}!</p>
+              <!-- User's name as title -->
+              <h1 class="display-4 fw-bold mb-4 text-white">{{ (user$ | async)?.name || 'User' }}</h1>
+              
+              <!-- User Information -->
+              <ng-container *ngIf="user$ | async as user">
+                <!-- GitHub URL -->
+                <div class="mb-4" *ngIf="hasGitHubUrl(user)">
+                  <p class="text-white mb-2">
+                    <i class="bi bi-github me-2"></i>
+                    <strong>GitHub Profile:</strong>
+                  </p>
+                  <p class="text-white-50 mb-2">
+                    <a 
+                      [href]="getGitHubUrl(user)" 
+                      target="_blank" 
+                      class="text-info text-decoration-none"
+                      rel="noopener noreferrer"
+                    >
+                      <code class="bg-dark bg-opacity-50 px-2 py-1 rounded">{{ getGitHubUrl(user) }}</code>
+                    </a>
+                  </p>
+                </div>
+              </ng-container>
+
+              <!-- City Input and Weather Button -->
               <div class="mt-4">
-                <button class="btn btn-light btn-lg px-4 py-3 rounded-3 fw-semibold shadow">
-                  <i class="bi bi-cloud-sun me-2"></i> Check Weather
-                </button>
+                <div class="row justify-content-center">
+                  <div class="col-lg-8 col-md-10">
+                    <div class="input-group mb-3">
+                      <input 
+                        type="text" 
+                        class="form-control form-control-lg" 
+                        placeholder="Enter city name"
+                        [(ngModel)]="currentCity"
+                        (keyup.enter)="checkWeather()"
+                      >
+                      <button 
+                        class="btn btn-primary btn-lg px-3" 
+                        type="button"
+                        (click)="checkWeather()"
+                        title="Check Weather"
+                      >
+                        <i class="bi bi-cloud-sun"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </div>
             </ng-container>
 
