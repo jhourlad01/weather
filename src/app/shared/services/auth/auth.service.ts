@@ -29,7 +29,9 @@ export class AuthService {
       id: user.sub || '',
       email: user.email || '',
       name: user.name || '',
-      picture: user.picture
+      picture: user.picture,
+      profile: String(user['profile'] || ''),
+      nickname: String(user['nickname'] || '')
     } : null)
   ) || of(null);
   readonly error$ = this.auth0?.error$.pipe(

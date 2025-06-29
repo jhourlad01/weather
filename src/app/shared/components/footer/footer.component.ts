@@ -26,6 +26,6 @@ export class FooterComponent {
 
   onCheckWeather(): void {
     // Navigate to weather page or trigger weather check
-    this.router.navigate(['/']);
+    this.router.navigate(['/weather']);
   }
 } 

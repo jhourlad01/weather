@@ -10,16 +10,33 @@
             </button>
           </div>
 
-          <h1 class="display-4 fw-bold mb-4 text-white">Weather Information</h1>
+          <h1 class="display-4 display-6-sm fw-bold mb-4 text-white">Weather Information</h1>
 
           <!-- City Input -->
           <div class="row justify-content-center mb-4">
             <div class="col-lg-8 col-md-10">
+              <!-- Location Detection Status -->
+              <div *ngIf="isDetectingLocation" class="text-center mb-3">
+                <div class="spinner-border spinner-border-sm text-light me-2" role="status">
+                  <span class="visually-hidden">Detecting location...</span>
+                </div>
+                <span class="text-white-50">Detecting your location...</span>
+              </div>
+              
+              <!-- Location Error -->
+              <div *ngIf="locationError" class="alert alert-warning alert-sm mb-3" role="alert">
+                <i class="bi bi-exclamation-triangle me-2"></i>
+                {{ locationError }}
+                <button class="btn btn-sm btn-outline-warning ms-2" (click)="detectCurrentLocation()">
+                  <i class="bi bi-geo-alt"></i> Try Again
+                </button>
+              </div>
+              
               <div class="input-group">
                 <input 
                   type="text" 
                   class="form-control form-control-lg" 
-                  placeholder="Enter city name..."
+                  placeholder="Enter City Name..."
                   [(ngModel)]="city"
                   (keyup.enter)="getWeatherData()"
                 >
@@ -31,6 +48,20 @@
                   title="Search Weather"
                 >
                   <i class="bi bi-search"></i>
+                </button>
+              </div>
+              
+              <!-- Location Detection Button -->
+              <div class="text-center mt-2">
+                <button 
+                  class="btn btn-outline-light btn-sm" 
+                  type="button"
+                  (click)="detectCurrentLocation()"
+                  [disabled]="isDetectingLocation"
+                  title="Detect my location"
+                >
+                  <i class="bi bi-geo-alt me-2"></i>
+                  {{ isDetectingLocation ? 'Detecting...' : 'Use My Location' }}
                 </button>
               </div>
             </div>
@@ -47,51 +78,84 @@
             <!-- Current Weather Card -->
             <div class="card bg-black bg-opacity-15 backdrop-blur border-0 shadow-lg mb-4">
               <div class="card-body p-5">
-                <div class="d-flex justify-content-between align-items-start mb-3">
-                  <h2 class="card-title mb-0 text-white">{{ weatherData.city }}</h2>
-                  <small class="text-white-50">Last updated: {{ weatherData.lastUpdated | date:'short' }}</small>
+                <div class="text-center mb-3">
+                  <h1 class="display-3 fw-bold mb-2 text-white text-capitalize">{{ weatherData.city }}</h1>
+                  <small class="text-white-50">Last Updated: {{ weatherData.lastUpdated | date:'short' }}</small>
                 </div>
                 
-                <h4 class="text-white-50 mb-4">Current Weather</h4>
+                <h4 class="text-white-50 mb-4">
+                  <i class="bi bi-sun me-2"></i>Current Weather
+                </h4>
                 
                 <div class="row">
                   <div class="col-md-6 text-center mb-4">
                     <div class="temperature-display">
+                      <div>
+                        <i [class]="'bi ' + getWeatherIcon(weatherData.current.icon).icon + ' ' + getWeatherIcon(weatherData.current.icon).color" style="font-size: 6rem;"></i>
+                      </div>
                       <h3 class="display-1 text-white mb-2">{{ weatherData.current.temperature }}</h3>
-                      <p class="lead text-white-50">{{ weatherData.current.description }}</p>
-                      <p class="text-white-50">{{ weatherData.current.feelsLike }}</p>
+                      <p class="lead text-white-50 mb-2 text-capitalize">{{ weatherData.current.description }}</p>
+                      <p class="text-white-50 text-capitalize">{{ weatherData.current.feelsLike }}</p>
                     </div>
                   </div>
                   
                   <div class="col-md-6">
                     <div class="weather-details">
-                      <div class="d-flex justify-content-between align-items-center mb-3">
-                        <span class="text-white-50">Humidity:</span>
-                        <span class="fw-bold text-white">{{ weatherData.current.humidity }}</span>
-                      </div>
-                      <div class="d-flex justify-content-between align-items-center mb-3">
-                        <span class="text-white-50">Wind Speed:</span>
-                        <span class="fw-bold text-white">{{ weatherData.current.windSpeed }}</span>
-                      </div>
-                      <div class="d-flex justify-content-between align-items-center mb-3">
-                        <span class="text-white-50">Pressure:</span>
-                        <span class="fw-bold text-white">{{ weatherData.current.pressure }}</span>
-                      </div>
-                      <div class="d-flex justify-content-between align-items-center mb-3">
-                        <span class="text-white-50">Visibility:</span>
-                        <span class="fw-bold text-white">{{ weatherData.current.visibility }}</span>
-                      </div>
-                      <div class="d-flex justify-content-between align-items-center mb-3">
-                        <span class="text-white-50">UV Index:</span>
-                        <span class="fw-bold text-white">{{ weatherData.current.uvIndex }}</span>
-                      </div>
-                      <div class="d-flex justify-content-between align-items-center mb-3">
-                        <span class="text-white-50">Sunrise:</span>
-                        <span class="fw-bold text-white">{{ weatherData.current.sunrise }}</span>
-                      </div>
-                      <div class="d-flex justify-content-between align-items-center mb-3">
-                        <span class="text-white-50">Sunset:</span>
-                        <span class="fw-bold text-white">{{ weatherData.current.sunset }}</span>
+                      <div class="row">
+                        <div class="col-6 mb-3">
+                          <div class="d-flex align-items-center">
+                            <i class="bi bi-droplet me-2 text-info"></i>
+                            <div>
+                              <small class="text-white-50 d-block">Humidity</small>
+                              <span class="fw-bold text-white">{{ weatherData.current.humidity }}</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="col-6 mb-3">
+                          <div class="d-flex align-items-center">
+                            <i class="bi bi-wind me-2 text-info"></i>
+                            <div>
+                              <small class="text-white-50 d-block">Wind Speed</small>
+                              <span class="fw-bold text-white">{{ weatherData.current.windSpeed }}</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="col-6 mb-3">
+                          <div class="d-flex align-items-center">
+                            <i class="bi bi-speedometer2 me-2 text-info"></i>
+                            <div>
+                              <small class="text-white-50 d-block">Pressure</small>
+                              <span class="fw-bold text-white">{{ weatherData.current.pressure }}</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="col-6 mb-3">
+                          <div class="d-flex align-items-center">
+                            <i class="bi bi-eye me-2 text-info"></i>
+                            <div>
+                              <small class="text-white-50 d-block">Visibility</small>
+                              <span class="fw-bold text-white">{{ weatherData.current.visibility }}</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="col-6 mb-3">
+                          <div class="d-flex align-items-center">
+                            <i class="bi bi-sunrise me-2 text-warning"></i>
+                            <div>
+                              <small class="text-white-50 d-block">Sunrise</small>
+                              <span class="fw-bold text-white">{{ weatherData.current.sunrise }}</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="col-6 mb-3">
+                          <div class="d-flex align-items-center">
+                            <i class="bi bi-sunset me-2 text-warning"></i>
+                            <div>
+                              <small class="text-white-50 d-block">Sunset</small>
+                              <span class="fw-bold text-white">{{ weatherData.current.sunset }}</span>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -102,17 +166,62 @@
             <!-- 5-Day Forecast Card -->
             <div class="card bg-black bg-opacity-15 backdrop-blur border-0 shadow-lg">
               <div class="card-body p-5">
-                <h4 class="text-white-50 mb-4">5-Day Forecast</h4>
+                <div class="d-flex flex-column flex-sm-row justify-content-center justify-content-sm-between align-items-center mb-4">
+                  <h4 class="text-white-50 mb-2 mb-sm-0 text-center text-sm-start">
+                    <i class="bi bi-calendar-week me-2"></i>
+                    <span *ngIf="forecastViewMode === 'daily'">5-Day Weather Forecast</span>
+                    <span *ngIf="forecastViewMode === 'hourly'">3-Hour Intervals</span>
+                  </h4>
+                  <button 
+                    class="btn btn-outline-light btn-sm" 
+                    type="button"
+                    (click)="toggleForecastView()"
+                    title="Toggle forecast view"
+                  >
+                    <i class="bi" [class.bi-calendar-week]="forecastViewMode === 'hourly'" [class.bi-clock]="forecastViewMode === 'daily'"></i>
+                    <span class="ms-2">
+                      {{ forecastViewMode === 'daily' ? 'Show Hourly' : 'Show Daily' }}
+                    </span>
+                  </button>
+                </div>
                 
-                <div class="row">
-                  <div class="col-12">
-                    <div class="row">
-                      <div *ngFor="let day of weatherData.forecast.dailySummaries" class="col-md-2 col-sm-4 col-6 mb-3">
-                        <div class="text-center p-3 rounded bg-black bg-opacity-10">
-                          <div class="text-white-50 mb-2">{{ day.date | date:'EEE' }}</div>
-                          <div class="text-white fw-bold mb-1">{{ day.minTemperature }}</div>
-                          <div class="text-white-50 small">{{ day.maxTemperature }}</div>
-                          <div class="text-white-50 small mt-1">{{ day.description }}</div>
+                <!-- Daily Forecast View -->
+                <div *ngIf="forecastViewMode === 'daily'">
+                  <div class="row">
+                    <div class="col-12">
+                      <div class="forecast-card-container">
+                        <div *ngFor="let day of weatherData.forecast.dailySummaries.slice(0, 5)">
+                          <div class="text-center p-3 rounded bg-black bg-opacity-10 border border-white border-opacity-10 hover-lift">
+                            <div class="text-white-50 mb-2 fw-semibold">{{ day.date | date:'EEE' }}</div>
+                            <div class="mb-2">
+                              <i [class]="'bi ' + getWeatherIcon(day.icon).icon + ' ' + getWeatherIcon(day.icon).color" class="display-4"></i>
+                            </div>
+                            <div class="text-white fw-bold mb-1 fs-5">{{ day.minTemperature }}</div>
+                            <div class="text-white-50 small">{{ day.maxTemperature }}</div>
+                            <div class="text-white-50 small mt-2 text-capitalize">{{ day.description }}</div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Hourly Forecast View -->
+                <div *ngIf="forecastViewMode === 'hourly'">
+                  <div class="row">
+                    <div class="col-12">
+                      <div class="forecast-card-container">
+                        <div *ngFor="let interval of weatherData.forecast.intervals.slice(0, 8)">
+                          <div class="text-center p-3 rounded bg-black bg-opacity-10 border border-white border-opacity-10 hover-lift">
+                            <div class="text-white-50 mb-2 fw-semibold">{{ interval.dateTime | date:'EEE' }}</div>
+                            <div class="text-white-50 small mb-1">{{ interval.dateTime | date:'HH:mm' }}</div>
+                            <div class="mb-2">
+                              <i [class]="'bi ' + getWeatherIcon(interval.icon).icon + ' ' + getWeatherIcon(interval.icon).color" class="display-4"></i>
+                            </div>
+                            <div class="text-white fw-bold mb-1 fs-5">{{ interval.temperature }}</div>
+                            <div class="text-white-50 small text-capitalize">{{ interval.description }}</div>
+                            <div class="text-white-50 small mt-1">{{ interval.humidity }}</div>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -135,8 +244,8 @@
             <div class="card bg-black bg-opacity-15 backdrop-blur border-0 shadow-lg">
               <div class="card-body p-5">
                 <i class="bi bi-cloud-sun display-1 text-white-50 mb-3"></i>
-                <h3 class="text-white">Enter a city to get weather information</h3>
-                <p class="text-white-50">Search for any city around the world to see current weather conditions and 5-day forecast.</p>
+                <h3 class="text-white">Enter A City To Get Weather Information</h3>
+                <p class="text-white-50">Search For Any City Around The World To See Current Weather Conditions And 5-Day Forecast.</p>
               </div>
             </div>
           </div>

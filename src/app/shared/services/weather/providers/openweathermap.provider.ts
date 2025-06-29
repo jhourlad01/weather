@@ -79,7 +79,18 @@ export class OpenWeatherMapProvider implements WeatherProvider {
   private readonly baseUrl = 'https://api.openweathermap.org/data/2.5';
 
   constructor() {
-    this.apiKey = environment.openWeatherMap?.apiKey || '';
+    try {
+      this.apiKey = environment?.openWeatherMap?.apiKey || '';
+      console.log('OpenWeatherMap Provider initialized');
+      console.log('Environment loaded:', !!environment);
+      console.log('OpenWeatherMap config:', environment?.openWeatherMap);
+      console.log('API Key available:', !!this.apiKey);
+      console.log('API Key length:', this.apiKey.length);
+      console.log('API Key starts with:', this.apiKey.substring(0, 4) + '...');
+    } catch (error) {
+      console.error('Error initializing OpenWeatherMap provider:', error);
+      this.apiKey = '';
+    }
   }
 
   getName(): string {
@@ -87,8 +98,15 @@ export class OpenWeatherMapProvider implements WeatherProvider {
   }
 
   isAvailable(): boolean {
-    // Check if we're on the client side and have an API key
-    return typeof window !== 'undefined' && !!this.apiKey;
+    // Check if we have an API key (don't check for window in SSR)
+    const hasApiKey = !!this.apiKey && this.apiKey.length > 0 && this.apiKey !== 'YOUR_OPENWEATHERMAP_API_KEY_HERE';
+    console.log('OpenWeatherMap isAvailable check:', {
+      hasApiKey,
+      apiKeyLength: this.apiKey.length,
+      apiKeyValue: this.apiKey.substring(0, 4) + '...',
+      isClient: typeof window !== 'undefined'
+    });
+    return hasApiKey;
   }
 
   async getWeather(request: WeatherRequest): Promise<WeatherResponse> {
@@ -152,7 +170,8 @@ export class OpenWeatherMapProvider implements WeatherProvider {
         visibility: data.visibility ? `${Math.round(data.visibility / 1000)} km` : 'Unknown',
         uvIndex: 'Not available', // OpenWeatherMap free tier doesn't include UV index
         sunrise: this.formatTime(data.sys.sunrise),
-        sunset: this.formatTime(data.sys.sunset)
+        sunset: this.formatTime(data.sys.sunset),
+        icon: data.weather[0]?.icon || undefined
       };
 
       return {
@@ -214,6 +233,15 @@ export class OpenWeatherMapProvider implements WeatherProvider {
         };
       }
       const data: OpenWeatherMapForecastResponse = await response.json();
+      
+      // Debug: Log the forecast data structure
+      console.log('OpenWeatherMap Forecast Data:', {
+        totalIntervals: data.list.length,
+        city: data.city.name,
+        firstInterval: data.list[0]?.dt_txt,
+        lastInterval: data.list[data.list.length - 1]?.dt_txt
+      });
+      
       // Transform intervals
       const intervals: WeatherForecastInterval[] = data.list.map(item => ({
         dateTime: item.dt_txt,
@@ -226,6 +254,7 @@ export class OpenWeatherMapProvider implements WeatherProvider {
         visibility: item.visibility ? `${Math.round(item.visibility / 1000)} km` : 'Unknown',
         icon: item.weather[0]?.icon || undefined
       }));
+      
       // Group by day for daily summaries
       const dailyMap = new Map<string, WeatherForecastDaySummary>();
       for (const item of data.list) {
@@ -249,6 +278,16 @@ export class OpenWeatherMapProvider implements WeatherProvider {
         }
       }
       const dailySummaries = Array.from(dailyMap.values());
+      
+      // Debug: Log the daily summaries
+      console.log('Daily Summaries:', {
+        totalDays: dailySummaries.length,
+        days: dailySummaries.map(day => ({
+          date: day.date,
+          dayName: new Date(day.date).toLocaleDateString('en-US', { weekday: 'short' })
+        }))
+      });
+      
       const forecast: WeatherForecast = {
         city: data.city.name,
         intervals,

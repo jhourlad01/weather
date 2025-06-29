@@ -5,6 +5,8 @@ export interface AuthUser {
   email: string;
   name: string;
   picture?: string;
+  profile?: string;
+  nickname?: string;
 }
 
 export interface AuthError {

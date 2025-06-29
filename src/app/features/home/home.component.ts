@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../shared/services/auth/auth.service';
 import { AuthUser } from '../../shared/services/auth/interfaces/auth.interface';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-home',
@@ -22,6 +23,130 @@ export class HomeComponent {
 
   // City input field
   currentCity = '';
+  isDetectingLocation = false;
+  locationError = '';
+  isAutoDetectedLocation = false; // Track if location was auto-detected
+
+  constructor() {
+    // Try to detect location on component initialization
+    this.detectCurrentLocation();
+  }
+
+  // Detect user's current location
+  async detectCurrentLocation(): Promise<void> {
+    if (!navigator.geolocation) {
+      this.locationError = 'Geolocation is not supported by this browser.';
+      return;
+    }
+
+    this.isDetectingLocation = true;
+    this.locationError = '';
+
+    try {
+      const position = await this.getCurrentPosition();
+      const { latitude, longitude } = position.coords;
+      
+      // Reverse geocode to get city name
+      const cityName = await this.reverseGeocode(latitude, longitude);
+      
+      if (cityName) {
+        this.currentCity = cityName;
+        this.isAutoDetectedLocation = true; // Mark as auto-detected
+        console.log('Detected location:', cityName);
+      } else {
+        this.locationError = 'Could not determine city name from location.';
+      }
+    } catch (error) {
+      console.error('Location detection error:', error);
+      this.locationError = 'Unable to detect your location. Please enter a city manually.';
+    } finally {
+      this.isDetectingLocation = false;
+    }
+  }
+
+  // Get current position with timeout
+  private getCurrentPosition(): Promise<GeolocationPosition> {
+    return new Promise((resolve, reject) => {
+      const timeoutId = setTimeout(() => {
+        reject(new Error('Location request timed out'));
+      }, 10000); // 10 second timeout
+
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          clearTimeout(timeoutId);
+          resolve(position);
+        },
+        (error) => {
+          clearTimeout(timeoutId);
+          reject(error);
+        },
+        {
+          enableHighAccuracy: false,
+          timeout: 10000,
+          maximumAge: 300000 // 5 minutes
+        }
+      );
+    });
+  }
+
+  // Reverse geocode coordinates to get city name
+  private async reverseGeocode(lat: number, lon: number): Promise<string | null> {
+    try {
+      const response = await fetch(
+        `https://api.openweathermap.org/geo/1.0/reverse?lat=${lat}&lon=${lon}&limit=5&appid=${environment.openWeatherMap.apiKey}`
+      );
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      if (data && data.length > 0) {
+        // Find the best city name with country info
+        for (const location of data) {
+          const cityName = location.name;
+          const state = location.state;
+          const country = location.country;
+          
+          // Skip generic names like "City", "Town", etc.
+          if (this.isGenericName(cityName)) continue;
+          
+          // Format: "City, State, Country" or "City, Country"
+          if (state && country) {
+            return `${cityName}, ${state}, ${country}`;
+          } else if (country) {
+            return `${cityName}, ${country}`;
+          } else {
+            return cityName;
+          }
+        }
+        
+        // Fallback to first result if no good match found
+        const firstLocation = data[0];
+        if (firstLocation.country) {
+          return `${firstLocation.name}, ${firstLocation.country}`;
+        }
+        return firstLocation.name;
+      }
+      
+      return null;
+    } catch (error) {
+      console.error('Reverse geocoding error:', error);
+      return null;
+    }
+  }
+
+  // Check if a name is too generic
+  private isGenericName(name: string): boolean {
+    const genericNames = [
+      'city', 'town', 'village', 'district', 'area', 'region', 'county', 'state',
+      'province', 'country', 'municipality', 'borough', 'neighborhood'
+    ];
+    
+    const lowerName = name.toLowerCase();
+    return genericNames.some(generic => lowerName.includes(generic));
+  }
 
   loginWithProvider(provider: string): void {
     // Auth0 will handle the provider selection based on the connection parameter
@@ -36,20 +161,40 @@ export class HomeComponent {
 
   // Generate GitHub URL from user data
   getGitHubUrl(user: AuthUser | null): string {
-    if (!user || !user.id) return '';
+    if (!user) return '';
     
-    // Extract username from Auth0 user ID (format: github|123456)
-    const githubId = user.id.split('|')[1];
-    if (githubId) {
-      return `https://github.com/user/${githubId}`;
+    // Auth0 provides the GitHub profile URL directly in the profile field
+    if (user.profile) {
+      return user.profile;
     }
     
-    // Fallback: try to extract from email or name
-    if (user.email && user.email.includes('@')) {
-      const username = user.email.split('@')[0];
+    // Fallback: try to construct from nickname (GitHub username)
+    if (user.nickname) {
+      return `https://github.com/${user.nickname}`;
+    }
+    
+    // Fallback: try to construct from email or name if profile/nickname are not available
+    if (user.email) {
+      // GitHub noreply email format: username@users.noreply.github.com
+      if (user.email.includes('@users.noreply.github.com')) {
+        const username = user.email.split('@')[0];
+        return `https://github.com/${username}`;
+      }
+      
+      // Regular email format: try to extract username
+      if (user.email.includes('@')) {
+        const username = user.email.split('@')[0];
+        return `https://github.com/${username}`;
+      }
+    }
+    
+    // Fallback: use the user's name (remove spaces and convert to lowercase)
+    if (user.name) {
+      const username = user.name.toLowerCase().replace(/\s+/g, '');
       return `https://github.com/${username}`;
     }
     
+    // If no profile, nickname, email, or name, don't show the link
     return '';
   }
 

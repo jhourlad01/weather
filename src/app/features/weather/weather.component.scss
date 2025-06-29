@@ -6,11 +6,18 @@
     -webkit-backdrop-filter: blur(10px);
     background: rgba(0, 0, 0, 0.15) !important;
     border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3) !important;
+    }
   }
   
   .temperature-display {
     h3 {
       font-weight: 700;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
     }
   }
   
@@ -18,17 +25,39 @@
     .d-flex {
       padding: 0.5rem 0;
       border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      transition: all 0.2s ease;
       
       &:last-child {
         border-bottom: none;
+      }
+      
+      &:hover {
+        background-color: rgba(255, 255, 255, 0.05);
+        border-radius: 8px;
+        padding: 8px;
+        margin: -8px;
       }
     }
   }
 }
 
-.spinner-border {
-  width: 3rem;
-  height: 3rem;
+.hover-lift {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 15px rgba(255, 255, 255, 0.1) !important;
+  }
+}
+
+.backdrop-blur {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
 /* iOS translucent style for all cards */
@@ -37,4 +66,100 @@
   -webkit-backdrop-filter: blur(10px);
   background: rgba(0, 0, 0, 0.15) !important;
   border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .weather-card {
+    .card-body {
+      padding: 1.5rem !important;
+    }
+  }
+  
+  .temperature-display {
+    h3 {
+      font-size: 3rem !important;
+    }
+  }
+}
+
+// Loading animation
+.spinner-border {
+  width: 3rem;
+  height: 3rem;
+}
+
+// Input group styling
+.input-group {
+  .form-control {
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white;
+    
+    &::placeholder {
+      color: rgba(255, 255, 255, 0.6);
+    }
+    
+    &:focus {
+      border-color: rgba(255, 255, 255, 0.5);
+      box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.25);
+      background-color: rgba(255, 255, 255, 0.15);
+    }
+  }
+  
+  .btn {
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+}
+
+// Alert styling
+.alert {
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+// Collapse animation
+.collapse {
+  transition: all 0.3s ease;
+}
+
+// Icon styling
+.bi {
+  &.text-info {
+    color: #17a2b8 !important;
+  }
+  
+  &.text-warning {
+    color: #ffc107 !important;
+  }
+}
+
+// Forecast card container using CSS Grid for perfect equal sizing
+.forecast-card-container {
+  display: grid;
+  gap: 1rem;
+  
+  // Responsive grid columns
+  @media (min-width: 1200px) {
+    grid-template-columns: repeat(6, 1fr); // 6 cards per row (lg)
+  }
+  
+  @media (min-width: 768px) and (max-width: 1199px) {
+    grid-template-columns: repeat(4, 1fr); // 4 cards per row (md)
+  }
+  
+  @media (min-width: 576px) and (max-width: 767px) {
+    grid-template-columns: repeat(2, 1fr); // 2 cards per row (sm)
+  }
+  
+  @media (max-width: 575px) {
+    grid-template-columns: 1fr; // 1 card per row (xs)
+  }
+  
+  > div {
+    display: flex;
+    height: 100%;
+    width: 100%;
+    min-height: 120px; // Ensure minimum height for consistency
+  }
 } 

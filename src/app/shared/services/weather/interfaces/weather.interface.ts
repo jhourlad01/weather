@@ -10,6 +10,7 @@ export interface WeatherData {
   uvIndex: string;
   sunrise: string;
   sunset: string;
+  icon?: string;
 }
 
 export interface WeatherForecastInterval {
