@@ -13,7 +13,7 @@ export const authGuard = () => {
       if (isAuthenticated) {
         return true;
       } else {
-        router.navigate(['/']);
+        router.navigate(['/unauthorized']);
         return false;
       }
     })

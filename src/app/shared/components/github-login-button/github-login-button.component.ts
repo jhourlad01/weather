@@ -8,7 +8,7 @@ import { AuthService } from '../../services/auth/auth.service';
   imports: [CommonModule],
   template: `
     <button 
-      class="btn btn-dark btn-sm d-flex align-items-center gap-2" 
+      class="btn btn-dark d-flex align-items-center gap-2" 
       type="button"
       (click)="loginWithGitHub()"
     >
