@@ -11,4 +11,5 @@ export type {
 } from './interfaces/weather.interface';
 
 // Export providers
-export { MockWeatherProvider } from './providers/mock-weather.provider'; 
+export { MockWeatherProvider } from './providers/mock-weather.provider';
+export { OpenWeatherMapProvider } from './providers/openweathermap.provider'; 

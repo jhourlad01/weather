@@ -6,5 +6,8 @@ export const environment = {
     clientId: 'XqJ0e10Bv4jYwFmi8Mhq7tLozGBJgGjv',
     redirectUri: 'http://localhost:4200',
     scope: 'openid profile email'
+  },
+  openWeatherMap: {
+    apiKey: 'https://openweathermap.org/forecast16#geo16'
   }
 }; 

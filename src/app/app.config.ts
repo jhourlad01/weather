@@ -2,7 +2,7 @@ import { ApplicationConfig, provideBrowserGlobalErrorListeners, provideZoneChang
 import { provideRouter } from '@angular/router';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { WEATHER_PROVIDER } from './shared/services/weather/weather.service';
-import { MockWeatherProvider } from './shared/services/weather/providers/mock-weather.provider';
+import { OpenWeatherMapProvider } from './shared/services/weather/providers/openweathermap.provider';
 
 import { routes } from './app.routes';
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
@@ -15,7 +15,7 @@ export const appConfig: ApplicationConfig = {
     provideClientHydration(withEventReplay()),
     provideAnimations(),
     // Weather provider configuration
-    MockWeatherProvider,
-    { provide: WEATHER_PROVIDER, useExisting: MockWeatherProvider }
+    OpenWeatherMapProvider,
+    { provide: WEATHER_PROVIDER, useExisting: OpenWeatherMapProvider }
   ]
 };
