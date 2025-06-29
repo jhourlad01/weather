@@ -1,7 +1,7 @@
 import { Injectable, inject, InjectionToken } from '@angular/core';
 import { Observable, from, of, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
-import { WeatherProvider, WeatherRequest, WeatherResponse, WeatherData } from './interfaces/weather.interface';
+import { WeatherProvider, WeatherRequest, WeatherResponse, WeatherData, WeatherForecastResponse, CombinedWeatherResponse } from './interfaces/weather.interface';
 
 // Injection token for weather provider
 export const WEATHER_PROVIDER = new InjectionToken<WeatherProvider>('WEATHER_PROVIDER');
@@ -79,5 +79,65 @@ export class WeatherService {
    */
   getProviderName(): string {
     return this.weatherProvider?.getName() || 'None';
+  }
+
+  /**
+   * Get 5-day/3-hour weather forecast for a city
+   * @param city - The city name
+   * @param units - Temperature units (metric/imperial)
+   * @param lang - Language for weather descriptions
+   * @returns Observable of weather forecast response
+   */
+  getForecast(city: string, units: 'metric' | 'imperial' = 'metric', lang = 'en'): Observable<WeatherForecastResponse> {
+    if (!this.weatherProvider || typeof this.weatherProvider.getForecast !== 'function') {
+      return throwError(() => new Error('Forecast not supported by this provider'));
+    }
+    if (!this.weatherProvider.isAvailable()) {
+      return throwError(() => new Error(`Weather provider ${this.weatherProvider?.getName()} is not available`));
+    }
+    const request = { city: city.trim(), units, lang };
+    return from(this.weatherProvider.getForecast(request)).pipe(
+      catchError(error => {
+        console.error('Weather forecast service error:', error);
+        return of({
+          data: null,
+          error: {
+            message: error.message || 'Failed to fetch weather forecast',
+            code: 'SERVICE_ERROR'
+          },
+          success: false
+        });
+      })
+    );
+  }
+
+  /**
+   * Get combined current weather and 5-day forecast for a city
+   * @param city - The city name
+   * @param units - Temperature units (metric/imperial)
+   * @param lang - Language for weather descriptions
+   * @returns Observable of combined weather response
+   */
+  getCombinedWeather(city: string, units: 'metric' | 'imperial' = 'metric', lang = 'en'): Observable<CombinedWeatherResponse> {
+    if (!this.weatherProvider || typeof this.weatherProvider.getCombinedWeather !== 'function') {
+      return throwError(() => new Error('Combined weather not supported by this provider'));
+    }
+    if (!this.weatherProvider.isAvailable()) {
+      return throwError(() => new Error(`Weather provider ${this.weatherProvider?.getName()} is not available`));
+    }
+    const request = { city: city.trim(), units, lang };
+    return from(this.weatherProvider.getCombinedWeather(request)).pipe(
+      catchError(error => {
+        console.error('Combined weather service error:', error);
+        return of({
+          data: null,
+          error: {
+            message: error.message || 'Failed to fetch combined weather data',
+            code: 'SERVICE_ERROR'
+          },
+          success: false
+        });
+      })
+    );
   }
 } 

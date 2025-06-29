@@ -1,7 +1,7 @@
 import { Routes } from '@angular/router';
 import { LayoutComponent } from './shared/layouts/layout.component';
-import { HomeComponent } from './features/home/home.component';
-import { WeatherComponent } from './features/weather/weather.component';
+import { HOME_ROUTES } from './features/home/home.routes';
+import { WEATHER_ROUTES } from './features/weather/weather.routes';
 
 export const routes: Routes = [
   {
@@ -10,11 +10,11 @@ export const routes: Routes = [
     children: [
       {
         path: '',
-        component: HomeComponent
+        children: HOME_ROUTES
       },
       {
         path: 'weather',
-        component: WeatherComponent
+        children: WEATHER_ROUTES
       }
     ]
   }

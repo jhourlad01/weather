@@ -1,21 +1,12 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-
-interface WeatherData {
-  city: string;
-  temperature: string;
-  description: string;
-  feelsLike: string;
-  humidity: string;
-  windSpeed: string;
-  pressure: string;
-  visibility: string;
-  uvIndex: string;
-  sunrise: string;
-  sunset: string;
-}
+import { Subject, takeUntil } from 'rxjs';
+import { 
+  WeatherService, 
+  CombinedWeatherData
+} from '../../shared/services/weather';
 
 @Component({
   selector: 'app-weather',
@@ -24,12 +15,14 @@ interface WeatherData {
   templateUrl: './weather.component.html',
   styleUrls: ['./weather.component.scss']
 })
-export class WeatherComponent implements OnInit {
+export class WeatherComponent implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+  private weatherService = inject(WeatherService);
+  private destroy$ = new Subject<void>();
 
   city = '';
-  weatherData: WeatherData | null = null;
+  weatherData: CombinedWeatherData | null = null;
   loading = false;
   error = '';
 
@@ -41,6 +34,11 @@ export class WeatherComponent implements OnInit {
         this.getWeatherData();
       }
     });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   // Capitalize first letter of city name
@@ -58,25 +56,23 @@ export class WeatherComponent implements OnInit {
     this.loading = true;
     this.error = '';
     
-    // TODO: Implement actual weather API call
-    // For now, simulate API call with more comprehensive data
-    setTimeout(() => {
-      this.loading = false;
-      const capitalizedCity = this.capitalizeCity(this.city);
-      this.weatherData = {
-        city: capitalizedCity,
-        temperature: '22°C',
-        description: 'Partly Cloudy',
-        feelsLike: 'Feels like 24°C',
-        humidity: '65%',
-        windSpeed: '12 km/h',
-        pressure: '1013 hPa',
-        visibility: '10 km',
-        uvIndex: 'Moderate (5)',
-        sunrise: '06:30 AM',
-        sunset: '07:45 PM'
-      };
-    }, 1000);
+    this.weatherService.getCombinedWeather(this.city)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          this.loading = false;
+          if (response.success && response.data) {
+            this.weatherData = response.data;
+          } else {
+            this.error = response.error?.message || 'Failed to fetch weather data';
+          }
+        },
+        error: (error) => {
+          this.loading = false;
+          this.error = error.message || 'An error occurred while fetching weather data';
+          console.error('Weather service error:', error);
+        }
+      });
   }
 
   goBack(): void {

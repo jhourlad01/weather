@@ -8,6 +8,6 @@ export const environment = {
     scope: 'openid profile email'
   },
   openWeatherMap: {
-    apiKey: '' // Replace with your actual API key
+    apiKey: ''
   }
 }; 

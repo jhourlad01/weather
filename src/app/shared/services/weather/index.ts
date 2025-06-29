@@ -7,7 +7,13 @@ export type {
   WeatherError, 
   WeatherRequest, 
   WeatherResponse, 
-  WeatherProvider 
+  WeatherProvider,
+  WeatherForecast,
+  WeatherForecastInterval,
+  WeatherForecastDaySummary,
+  WeatherForecastResponse,
+  CombinedWeatherData,
+  CombinedWeatherResponse
 } from './interfaces/weather.interface';
 
 // Export providers
