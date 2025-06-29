@@ -2,16 +2,22 @@
   <!-- Authenticated User -->
   <ng-container *ngIf="isAuthenticated$ | async; else loginButton">
     <button 
-      class="btn btn-link text-decoration-none d-flex align-items-center gap-2 text-dark" 
+      class="btn btn-link text-decoration-none d-flex align-items-center gap-2 text-dark no-caret" 
       type="button" 
       ngbDropdownToggle
       aria-expanded="false"
     >
-      <div class="avatar-placeholder rounded-circle bg-secondary d-flex align-items-center justify-content-center" 
-           style="width: 32px; height: 32px;">
-        <i class="bi bi-person text-white fs-6"></i>
-      </div>
-      <span class="d-none d-md-inline">{{ (user$ | async)?.name || 'User' }}</span>
+      <ng-container *ngIf="(user$ | async) as user">
+        <ng-container *ngIf="user.picture; else avatarPlaceholder">
+          <img [src]="user.picture" [alt]="user.name || 'User'" class="rounded-circle object-fit-cover" style="width: 32px; height: 32px;" />
+        </ng-container>
+        <ng-template #avatarPlaceholder>
+          <div class="avatar-placeholder rounded-circle bg-secondary d-flex align-items-center justify-content-center" 
+               style="width: 32px; height: 32px;">
+            <i class="bi bi-person text-white fs-6"></i>
+          </div>
+        </ng-template>
+      </ng-container>
     </button>
     <ul ngbDropdownMenu class="dropdown-menu dropdown-menu-end shadow-sm">
       <li *ngFor="let item of menuItems" [class.d-lg-none]="item.mobileOnly">
