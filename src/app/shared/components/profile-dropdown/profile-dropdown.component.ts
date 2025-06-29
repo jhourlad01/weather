@@ -1,5 +1,6 @@
 import { Component, EventEmitter, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { NgbDropdownModule } from '@ng-bootstrap/ng-bootstrap';
 
 /**
  * Interface for dropdown menu items
@@ -24,13 +25,13 @@ export interface MenuItem {
 @Component({
   selector: 'app-profile-dropdown',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, NgbDropdownModule],
   template: `
-    <div class="dropdown position-relative">
+    <div ngbDropdown class="dropdown position-relative">
       <button 
-        class="btn btn-link text-decoration-none dropdown-toggle d-flex align-items-center gap-2" 
+        class="btn btn-link text-decoration-none d-flex align-items-center gap-2" 
         type="button" 
-        data-bs-toggle="dropdown" 
+        ngbDropdownToggle
         aria-expanded="false"
       >
         <div class="avatar-placeholder rounded-circle bg-secondary d-flex align-items-center justify-content-center" 
@@ -39,11 +40,12 @@ export interface MenuItem {
         </div>
         <span class="d-none d-md-inline">User</span>
       </button>
-      <ul class="dropdown-menu dropdown-menu-end position-absolute">
+      <ul ngbDropdownMenu class="dropdown-menu dropdown-menu-end position-absolute">
         <li *ngFor="let item of menuItems" [class.d-lg-none]="item.mobileOnly">
           <button 
             class="dropdown-item d-flex align-items-center gap-2" 
             type="button"
+            ngbDropdownItem
             (click)="onItemClick(item)"
           >
             <i *ngIf="item.icon" [class]="item.icon"></i>
@@ -64,10 +66,6 @@ export interface MenuItem {
     
     .dropdown-item:hover {
       background-color: #f8f9fa;
-    }
-    
-    .dropdown-toggle::after {
-      display: none;
     }
     
     .dropdown-menu {
