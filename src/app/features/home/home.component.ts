@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../shared/services/auth/auth.service';
 import { AuthUser } from '../../shared/services/auth/interfaces/auth.interface';
 import { environment } from '../../../environments/environment';
+import { InputValidationUtil } from '../../shared/utils/input-validation.util';
 
 @Component({
   selector: 'app-home',
@@ -200,15 +201,22 @@ export class HomeComponent {
 
   // Navigate to weather page with city parameter
   checkWeather(): void {
-    if (this.currentCity.trim()) {
-      // Navigate to weather page with city parameter
-      this.router.navigate(['/weather'], { 
-        queryParams: { city: this.currentCity.trim() } 
-      });
-    } else {
-      // Navigate to weather page without city parameter
-      this.router.navigate(['/weather']);
+    if (!this.currentCity.trim()) {
+      return;
     }
+
+    // Validate and sanitize city input
+    const sanitizedCity = InputValidationUtil.sanitizeCityName(this.currentCity);
+    if (!sanitizedCity) {
+      // Show error message to user
+      console.warn('Invalid city name entered:', this.currentCity);
+      return;
+    }
+
+    // Navigate to weather page with the validated city
+    this.router.navigate(['/weather'], { 
+      queryParams: { city: sanitizedCity } 
+    });
   }
 
   // Check if user has a valid GitHub URL

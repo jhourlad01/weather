@@ -3,10 +3,9 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Subject, takeUntil } from 'rxjs';
-import { 
-  WeatherService, 
-  CombinedWeatherData
-} from '../../shared/services/weather';
+import { WeatherService } from '../../shared/services/weather/weather.service';
+import { CombinedWeatherData } from '../../shared/services/weather/interfaces/weather.interface';
+import { InputValidationUtil } from '../../shared/utils/input-validation.util';
 
 @Component({
   selector: 'app-weather',
@@ -24,7 +23,7 @@ export class WeatherComponent implements OnInit, OnDestroy {
   city = '';
   weatherData: CombinedWeatherData | null = null;
   loading = false;
-  error = '';
+  error: string | null = null;
   forecastViewMode: 'daily' | 'hourly' = 'daily'; // Track current view mode
   isDetectingLocation = false;
   locationError = '';
@@ -236,24 +235,30 @@ export class WeatherComponent implements OnInit, OnDestroy {
       return;
     }
 
+    // Validate and sanitize city input
+    const sanitizedCity = InputValidationUtil.sanitizeCityName(this.city);
+    if (!sanitizedCity) {
+      this.error = 'Please enter a valid city name (1-50 characters, letters, spaces, hyphens, apostrophes only)';
+      return;
+    }
+
     this.loading = true;
-    this.error = '';
+    this.error = null;
     
-    this.weatherService.getCombinedWeather(this.city)
+    this.weatherService.getCombinedWeather(sanitizedCity)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {
-          this.loading = false;
           if (response.success && response.data) {
             this.weatherData = response.data;
           } else {
             this.error = response.error?.message || 'Failed to fetch weather data';
           }
-        },
-        error: (error) => {
           this.loading = false;
-          this.error = error.message || 'An error occurred while fetching weather data';
-          console.error('Weather service error:', error);
+        },
+        error: (err) => {
+          this.error = err.message || 'Failed to fetch weather data';
+          this.loading = false;
         }
       });
   }

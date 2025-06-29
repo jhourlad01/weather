@@ -2,6 +2,7 @@ import { Injectable, inject, InjectionToken } from '@angular/core';
 import { Observable, from, of, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { WeatherProvider, WeatherRequest, WeatherResponse, WeatherData, WeatherForecastResponse, CombinedWeatherResponse } from './interfaces/weather.interface';
+import { RateLimiterService } from '../rate-limiter.service';
 
 // Injection token for weather provider
 export const WEATHER_PROVIDER = new InjectionToken<WeatherProvider>('WEATHER_PROVIDER');
@@ -11,6 +12,13 @@ export const WEATHER_PROVIDER = new InjectionToken<WeatherProvider>('WEATHER_PRO
 })
 export class WeatherService {
   private weatherProvider = inject(WEATHER_PROVIDER, { optional: true });
+  private rateLimiter = inject(RateLimiterService);
+
+  // Rate limiting configuration for weather API calls
+  private readonly rateLimitConfig = {
+    maxRequests: 30, // 30 requests
+    timeWindow: 60000 // per minute
+  };
 
   constructor() {
     console.log('WeatherService initialized');
@@ -33,6 +41,13 @@ export class WeatherService {
       return throwError(() => new Error(`Weather provider ${this.weatherProvider?.getName()} is not available`));
     }
 
+    // Check rate limiting
+    const rateLimitKey = `weather-api-${city.toLowerCase()}`;
+    if (!this.rateLimiter.isAllowed(rateLimitKey, this.rateLimitConfig)) {
+      const status = this.rateLimiter.getStatus(rateLimitKey, this.rateLimitConfig);
+      return throwError(() => new Error(`Rate limit exceeded. Please wait ${Math.ceil(status.timeUntilReset / 1000)} seconds before trying again.`));
+    }
+
     const request: WeatherRequest = {
       city: city.trim(),
       units,
@@ -40,12 +55,13 @@ export class WeatherService {
     };
 
     return from(this.weatherProvider.getWeather(request)).pipe(
-      catchError(error => {
+      catchError((error: Error | unknown) => {
         console.error('Weather service error:', error);
+        const errorMessage = error instanceof Error ? error.message : 'Failed to fetch weather data';
         return of({
           data: null,
           error: {
-            message: error.message || 'Failed to fetch weather data',
+            message: errorMessage,
             code: 'SERVICE_ERROR'
           },
           success: false
@@ -95,14 +111,23 @@ export class WeatherService {
     if (!this.weatherProvider.isAvailable()) {
       return throwError(() => new Error(`Weather provider ${this.weatherProvider?.getName()} is not available`));
     }
+
+    // Check rate limiting
+    const rateLimitKey = `weather-forecast-${city.toLowerCase()}`;
+    if (!this.rateLimiter.isAllowed(rateLimitKey, this.rateLimitConfig)) {
+      const status = this.rateLimiter.getStatus(rateLimitKey, this.rateLimitConfig);
+      return throwError(() => new Error(`Rate limit exceeded. Please wait ${Math.ceil(status.timeUntilReset / 1000)} seconds before trying again.`));
+    }
+
     const request = { city: city.trim(), units, lang };
     return from(this.weatherProvider.getForecast(request)).pipe(
-      catchError(error => {
+      catchError((error: Error | unknown) => {
         console.error('Weather forecast service error:', error);
+        const errorMessage = error instanceof Error ? error.message : 'Failed to fetch weather forecast';
         return of({
           data: null,
           error: {
-            message: error.message || 'Failed to fetch weather forecast',
+            message: errorMessage,
             code: 'SERVICE_ERROR'
           },
           success: false
@@ -125,19 +150,43 @@ export class WeatherService {
     if (!this.weatherProvider.isAvailable()) {
       return throwError(() => new Error(`Weather provider ${this.weatherProvider?.getName()} is not available`));
     }
+
+    // Check rate limiting
+    const rateLimitKey = `weather-combined-${city.toLowerCase()}`;
+    if (!this.rateLimiter.isAllowed(rateLimitKey, this.rateLimitConfig)) {
+      const status = this.rateLimiter.getStatus(rateLimitKey, this.rateLimitConfig);
+      return throwError(() => new Error(`Rate limit exceeded. Please wait ${Math.ceil(status.timeUntilReset / 1000)} seconds before trying again.`));
+    }
+
     const request = { city: city.trim(), units, lang };
     return from(this.weatherProvider.getCombinedWeather(request)).pipe(
-      catchError(error => {
+      catchError((error: Error | unknown) => {
         console.error('Combined weather service error:', error);
+        const errorMessage = error instanceof Error ? error.message : 'Failed to fetch combined weather data';
         return of({
           data: null,
           error: {
-            message: error.message || 'Failed to fetch combined weather data',
+            message: errorMessage,
             code: 'SERVICE_ERROR'
           },
           success: false
         });
       })
     );
+  }
+
+  /**
+   * Get rate limit status for a city
+   * @param city - The city name
+   * @returns rate limit status information
+   */
+  getRateLimitStatus(city: string): {
+    isAllowed: boolean;
+    remainingRequests: number;
+    timeUntilReset: number;
+    isRateLimited: boolean;
+  } {
+    const rateLimitKey = `weather-api-${city.toLowerCase()}`;
+    return this.rateLimiter.getStatus(rateLimitKey, this.rateLimitConfig);
   }
 } 
