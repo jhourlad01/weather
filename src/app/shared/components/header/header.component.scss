@@ -1,0 +1,66 @@
+/* Navigation styles - iOS Design */
+.navbar {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    flex-shrink: 0;
+    z-index: 1000;
+}
+
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.25rem;
+    letter-spacing: -0.025em;
+    color: #1D1D1F;
+    text-decoration: none;
+}
+
+.sun-logo {
+    color: #FF9500;
+    font-size: 1.5rem;
+    filter: drop-shadow(0 1px 2px rgba(255, 149, 0, 0.3));
+}
+
+.nav-link {
+    color: #1D1D1F !important;
+    font-weight: 500;
+    transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    letter-spacing: -0.01em;
+    position: relative;
+    text-decoration: none;
+}
+
+.nav-link:hover {
+    color: #007AFF !important;
+    transform: translateY(-1px);
+}
+
+.nav-link.active {
+    color: #007AFF !important;
+}
+
+/* Dark mode styles - iOS Design */
+@media (prefers-color-scheme: dark) {
+    .navbar {
+        background: rgba(28, 28, 30, 0.8);
+        border-bottom-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    .navbar-brand {
+        color: #FFFFFF;
+    }
+    
+    .nav-link {
+        color: #FFFFFF !important;
+    }
+    
+    .nav-link:hover {
+        color: #0A84FF !important;
+    }
+    
+    .nav-link.active {
+        color: #0A84FF !important;
+    }
+} 
