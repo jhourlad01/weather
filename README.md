@@ -14,12 +14,12 @@ A secure Angular weather application with authentication and real-time weather d
 ## Services
 
 ### Weather Service
-Injectable service for weather data operations. Supports multiple weather providers through dependency injection. SOLID principle-compliant with interface segregation and dependency inversion.
+Handles weather data operations with support for multiple providers through dependency injection.
 
 ### Authentication Service
-Injectable service for user authentication and authorization. Handles Auth0 integration with proper abstraction layers. SOLID principle-compliant with single responsibility and dependency inversion.
+Manages user authentication and authorization with Auth0 integration.
 
-Both services can be injected into components and support provider pattern for extensibility.
+Both services follow SOLID principles and support the provider pattern for extensibility. The Weather Service uses dependency injection to switch between different weather data providers (OpenWeatherMap, mock data, etc.), while the Authentication Service provides a unified interface for different authentication methods. This architecture allows for easy testing, maintenance, and future enhancements without modifying existing components.
 
 ## Setup
 
@@ -57,6 +57,29 @@ The application integrates with:
 - Auth0 for authentication
 - GitHub OAuth for social login
 
-## License
+## Linting
 
-This project is licensed under the MIT License.
+To check code quality and enforce consistent style, run:
+
+```bash
+# Code quality check
+npm run lint
+
+# To automatically fix lint errors:
+npm run lint:fix
+```
+
+## Testing
+
+To run unit tests with Karma, use:
+
+```bash
+npm test
+```
+
+This will launch the test runner in watch mode. You can also configure or update tests in the `src/` directory.
+
+## Git Hooks (Husky)
+
+This project uses Husky to manage Git hooks. Automatically runs linting, tests, and security audit before each commit to ensure code quality. This ensures that only code that passes linting, tests, and security checks can be committed to the repository.
+
